@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>💬 Обратная связь</h1>
+        <p>Сообщения от пользователей бота</p>
+    </div>
+</div>
+
+{% if feedbacks %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Сообщение</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in feedbacks %}
+            <tr>
+                <td>
+                    <div class="feedback-author">{{ f.full_name or 'Без имени' }}</div>
+                    <div class="muted">
+                        {% if f.username %}@{{ f.username }}{% endif %}
+                        &middot; ID: {{ f.telegram_id }}
+                    </div>
+                </td>
+                <td class="muted">{{ f.text[:80] }}{{ '…' if f.text|length > 80 }}</td>
+                <td class="muted">{{ f.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card empty">
+    <div class="empty-icon">📭</div>
+    <h3>Сообщений пока нет</h3>
+    <p>Обратная связь от пользователей появится здесь</p>
+</div>
+{% endif %}
+{% endblock %}

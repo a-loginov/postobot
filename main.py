@@ -6,7 +6,8 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand
 
 import config
-from database.database import init_db
+from database.database import SessionLocal, init_db
+from database.models import User, UserRole
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +27,29 @@ def setup_logging() -> None:
     )
 
 
+def seed_admins() -> None:
+    db = SessionLocal()
+    try:
+        for tg_id in config.ADMIN_IDS:
+            user = db.query(User).filter(User.telegram_id == tg_id).first()
+            if user is None:
+                user = User(telegram_id=tg_id, role=UserRole.ADMIN)
+                db.add(user)
+                logger.info("Seeded admin telegram_id=%s", tg_id)
+            elif user.role != UserRole.ADMIN:
+                user.role = UserRole.ADMIN
+                logger.info("Promoted telegram_id=%s to ADMIN", tg_id)
+        db.commit()
+    finally:
+        db.close()
+
+
 async def main() -> None:
     setup_logging()
 
     logger.info("Подключение к базе данных: %s", config.DATABASE_URL)
     init_db()
+    seed_admins()
     logger.info("База данных готова")
 
     from admin.main import start_admin_server

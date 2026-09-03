@@ -41,6 +41,25 @@ class User(Base):
         return f"<User id={self.id} telegram_id={self.telegram_id} role={self.role}>"
 
 
+class Feedback(Base):
+    __tablename__ = "feedbacks"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    telegram_id: Mapped[int] = mapped_column(index=True)
+    username: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    full_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    text: Mapped[str] = mapped_column(String(4000))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    user: Mapped[User] = relationship()
+
+    def __repr__(self) -> str:
+        return f"<Feedback id={self.id} telegram_id={self.telegram_id}>"
+
+
 class Request(Base):
     __tablename__ = "requests"
 

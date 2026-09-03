@@ -8,6 +8,8 @@ from bot.context import unit_of_work
 from bot.keyboards.main import get_main_keyboard
 from bot.keyboards.request import get_cancel_keyboard
 from bot.states.request import FeedbackForm
+from database.database import SessionLocal
+from database.models import Feedback
 from database.repositories.users import UserRepository
 from services.notification_service import NotificationService
 
@@ -56,12 +58,22 @@ async def on_feedback_text(message: types.Message, bot: Bot, state: FSMContext) 
     try:
         with unit_of_work() as (service, session):
             user_repo = UserRepository(session)
-            user_repo.get_or_create(
+            user = user_repo.get_or_create(
                 telegram_id=sender.id,
                 username=sender.username,
                 full_name=sender.full_name,
             )
             admin_ids = service.list_admin_ids()
+
+            db_feedback = Feedback(
+                user_id=user.id,
+                telegram_id=sender.id,
+                username=sender.username,
+                full_name=sender.full_name,
+                text=text,
+            )
+            session.add(db_feedback)
+            session.commit()
 
         n = NotificationService(bot)
         await n.notify_admins_feedback(admin_ids, sender.id, text)

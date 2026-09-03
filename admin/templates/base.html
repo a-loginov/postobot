@@ -2,46 +2,55 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ title }} · ПостоБот</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f1220;
-            --bg-card: #1a1e33;
-            --bg-card-hover: #222741;
-            --bg-input: #12162a;
-            --border: #2a3150;
-            --text: #e8ecf8;
-            --text-muted: #8b93b8;
-            --accent: #6366f1;
-            --accent-hover: #4f52e0;
+            --bg: #0f172a;
+            --bg-card: rgba(27, 35, 54, 0.8);
+            --bg-card-solid: #1b2336;
+            --bg-card-hover: rgba(39, 47, 66, 0.9);
+            --bg-input: rgba(15, 23, 42, 0.6);
+            --border: rgba(71, 85, 105, 0.4);
+            --border-strong: rgba(71, 85, 105, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+            --accent-glow: rgba(34, 197, 94, 0.15);
             --green: #22c55e;
             --yellow: #eab308;
             --blue: #3b82f6;
             --red: #ef4444;
             --purple: #a855f7;
-            --radius: 14px;
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --blur: 16px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Fira Sans', system-ui, -apple-system, sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             display: flex;
             font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
         /* ---------- Sidebar ---------- */
         .sidebar {
-            width: 240px;
-            min-width: 240px;
+            width: 260px;
+            min-width: 260px;
             background: var(--bg-card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border-right: 1px solid var(--border);
             padding: 24px 16px;
             display: flex;
@@ -49,35 +58,39 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            z-index: 100;
         }
 
         .brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0 8px 20px;
+            padding: 0 8px 24px;
             border-bottom: 1px solid var(--border);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .brand-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), var(--purple));
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--accent), #15803d);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            font-size: 15px;
+            font-weight: 700;
             color: #fff;
             flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(34, 197, 94, 0.25);
         }
 
         .brand-title {
             font-weight: 700;
-            font-size: 16px;
+            font-size: 17px;
             line-height: 1.2;
+            letter-spacing: -0.01em;
         }
         .brand-sub {
             font-size: 12px;
@@ -91,19 +104,37 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 12px;
-            border-radius: 10px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
-            transition: background .15s, color .15s;
+            font-size: 14px;
+            transition: all .2s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .nav a:hover { background: var(--bg-card-hover); color: var(--text); }
+        .nav a:hover {
+            background: var(--bg-card-hover);
+            color: var(--text);
+        }
         .nav a.active {
-            background: var(--accent);
-            color: #fff;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-weight: 600;
         }
-        .nav-icon { font-size: 18px; width: 20px; text-align: center; }
+        .nav a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 0 4px 4px 0;
+        }
+        .nav-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
 
         .sidebar-footer {
             padding-top: 16px;
@@ -113,14 +144,43 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 11px 12px;
-            border-radius: 10px;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
-            transition: background .15s, color .15s;
+            font-size: 14px;
+            transition: all .2s ease;
         }
-        .sidebar-footer a:hover { background: var(--bg-card-hover); color: var(--red); }
+        .sidebar-footer a:hover { background: rgba(239, 68, 68, 0.1); color: var(--red); }
+
+        /* ---------- Mobile nav toggle ---------- */
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-card-solid);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 20px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
 
         /* ---------- Main content ---------- */
         .main {
@@ -136,10 +196,13 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
         .page-header h1 {
-            font-size: 26px;
-            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            font-size: 24px;
+            font-weight: 700;
             letter-spacing: -0.02em;
         }
         .page-header p {
@@ -158,13 +221,18 @@
 
         .card {
             background: var(--bg-card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 20px;
             box-shadow: var(--shadow);
-            transition: transform .15s, background .15s;
+            transition: transform .2s ease, border-color .2s ease;
         }
-        .card:hover { background: var(--bg-card-hover); transform: translateY(-2px); }
+        .card:hover {
+            border-color: var(--border-strong);
+            transform: translateY(-2px);
+        }
 
         .card-label {
             font-size: 13px;
@@ -176,8 +244,9 @@
             gap: 8px;
         }
         .card-value {
-            font-size: 32px;
-            font-weight: 800;
+            font-family: 'Fira Code', monospace;
+            font-size: 28px;
+            font-weight: 700;
             letter-spacing: -0.02em;
         }
 
@@ -193,63 +262,28 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 4px 12px;
+            padding: 5px 12px;
             border-radius: 999px;
             font-size: 12px;
             font-weight: 600;
             white-space: nowrap;
         }
-        .badge-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .badge-dot { width: 7px; height: 7px; border-radius: 50%; }
 
-        .badge-new { background: rgba(234, 179, 8, 0.15); color: var(--yellow); }
+        .badge-new { background: rgba(234, 179, 8, 0.12); color: var(--yellow); }
         .badge-new .badge-dot { background: var(--yellow); }
-        .badge-in-progress { background: rgba(59, 130, 246, 0.15); color: var(--blue); }
+        .badge-in-progress { background: rgba(59, 130, 246, 0.12); color: var(--blue); }
         .badge-in-progress .badge-dot { background: var(--blue); }
-        .badge-completed { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+        .badge-completed { background: rgba(34, 197, 94, 0.12); color: var(--green); }
         .badge-completed .badge-dot { background: var(--green); }
-        .badge-rejected { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+        .badge-rejected { background: rgba(239, 68, 68, 0.12); color: var(--red); }
         .badge-rejected .badge-dot { background: var(--red); }
-
-        /* ---------- Chart ---------- */
-        .chart {
-            display: flex;
-            align-items: flex-end;
-            gap: 12px;
-            height: 200px;
-            padding: 16px;
-            margin-top: 8px;
-        }
-        .chart-bar-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            height: 100%;
-            gap: 8px;
-            min-width: 0;
-        }
-        .chart-bar {
-            background: linear-gradient(to top, var(--accent), var(--purple));
-            border-radius: 8px 8px 0 0;
-            min-height: 4px;
-            transition: height .3s;
-            opacity: 0.9;
-        }
-        .chart-bar:hover { opacity: 1; }
-        .chart-label {
-            text-align: center;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        .chart-count {
-            text-align: center;
-            font-size: 12px;
-            font-weight: 700;
-        }
 
         /* ---------- Table ---------- */
         .table-wrap {
             background: var(--bg-card);
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
             border: 1px solid var(--border);
             border-radius: var(--radius);
             overflow: hidden;
@@ -262,11 +296,12 @@
         th {
             text-align: left;
             padding: 14px 18px;
-            font-size: 12px;
+            font-family: 'Fira Code', monospace;
+            font-size: 11px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             color: var(--text-muted);
-            background: var(--bg-card-hover);
+            background: rgba(39, 47, 66, 0.5);
             font-weight: 600;
             border-bottom: 1px solid var(--border);
         }
@@ -276,19 +311,23 @@
             font-size: 14px;
         }
         tr:last-child td { border-bottom: none; }
+        tbody tr { transition: background .15s ease; }
         tbody tr:hover { background: var(--bg-card-hover); }
         .table-link {
             color: var(--accent);
             text-decoration: none;
             font-weight: 600;
+            font-family: 'Fira Code', monospace;
+            font-size: 13px;
         }
         .table-link:hover { text-decoration: underline; }
         .muted { color: var(--text-muted); font-size: 13px; }
 
         /* ---------- Section title ---------- */
         .section-title {
-            font-size: 17px;
-            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+            font-size: 15px;
+            font-weight: 600;
             margin-bottom: 14px;
             display: flex;
             align-items: center;
@@ -304,14 +343,15 @@
         }
         .filter-tab {
             padding: 8px 16px;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border);
             background: var(--bg-card);
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
             font-size: 13px;
-            transition: all .15s;
+            transition: all .2s ease;
+            cursor: pointer;
         }
         .filter-tab:hover { background: var(--bg-card-hover); color: var(--text); }
         .filter-tab.active {
@@ -336,47 +376,38 @@
             gap: 24px;
             margin-top: 8px;
         }
-        @media (max-width: 900px) {
-            .detail-grid { grid-template-columns: 1fr; }
-            .main { padding: 20px; }
-            .sidebar { width: 200px; min-width: 200px; }
-        }
-        @media (max-width: 700px) {
-            body { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: static; flex-direction: row; align-items: center; padding: 12px 16px; }
-            .brand { border: none; margin: 0; padding: 0; }
-            .nav { flex-direction: row; justify-content: center; }
-            .nav a span.label, .sidebar-footer { display: none; }
-        }
 
         .detail-info p {
             margin-bottom: 10px;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .detail-info strong { color: var(--text); }
         .detail-reason {
             background: var(--bg-card);
+            backdrop-filter: blur(var(--blur));
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.7;
             white-space: pre-wrap;
         }
 
         .detail-sidebar .card { margin-bottom: 16px; }
 
+        /* ---------- Buttons ---------- */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 10px 18px;
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             font-weight: 600;
             font-size: 14px;
             border: 1px solid transparent;
             cursor: pointer;
             text-decoration: none;
-            transition: all .15s;
+            transition: all .2s ease;
+            -webkit-tap-highlight-color: transparent;
         }
         .btn-primary {
             background: var(--accent);
@@ -385,14 +416,14 @@
             justify-content: center;
         }
         .btn-primary:hover { background: var(--accent-hover); }
-        .btn-new { background: rgba(234,179,8,.12); color: var(--yellow); border-color: rgba(234,179,8,.3); }
-        .btn-new:hover { background: rgba(234,179,8,.25); }
-        .btn-progress { background: rgba(59,130,246,.12); color: var(--blue); border-color: rgba(59,130,246,.3); }
-        .btn-progress:hover { background: rgba(59,130,246,.25); }
-        .btn-completed { background: rgba(34,197,94,.12); color: var(--green); border-color: rgba(34,197,94,.3); }
-        .btn-completed:hover { background: rgba(34,197,94,.25); }
-        .btn-rejected { background: rgba(239,68,68,.12); color: var(--red); border-color: rgba(239,68,68,.3); }
-        .btn-rejected:hover { background: rgba(239,68,68,.25); }
+        .btn-new { background: rgba(234,179,8,.1); color: var(--yellow); border-color: rgba(234,179,8,.25); }
+        .btn-new:hover { background: rgba(234,179,8,.2); }
+        .btn-progress { background: rgba(59,130,246,.1); color: var(--blue); border-color: rgba(59,130,246,.25); }
+        .btn-progress:hover { background: rgba(59,130,246,.2); }
+        .btn-completed { background: rgba(34,197,94,.1); color: var(--green); border-color: rgba(34,197,94,.25); }
+        .btn-completed:hover { background: rgba(34,197,94,.2); }
+        .btn-rejected { background: rgba(239,68,68,.1); color: var(--red); border-color: rgba(239,68,68,.25); }
+        .btn-rejected:hover { background: rgba(239,68,68,.2); }
 
         .status-form { display: grid; gap: 10px; }
 
@@ -406,11 +437,191 @@
         .meta-row:last-child { border-bottom: none; }
         .meta-key { color: var(--text-muted); font-size: 13px; }
         .meta-value { font-weight: 600; font-size: 14px; text-align: right; }
+
+        /* ---------- Forms ---------- */
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 14px;
+            font-family: 'Fira Sans', sans-serif;
+            transition: border-color .2s ease;
+            outline: none;
+        }
+        .form-input:focus { border-color: var(--accent); }
+        .form-input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+        /* ---------- Role badges ---------- */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .role-admin { background: rgba(34, 197, 94, 0.12); color: var(--green); }
+        .role-user { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); }
+
+        /* ---------- Feedback card ---------- */
+        .feedback-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(var(--blur));
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 12px;
+            transition: border-color .2s ease;
+        }
+        .feedback-card:hover { border-color: var(--border-strong); }
+        .feedback-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .feedback-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .feedback-date {
+            font-family: 'Fira Code', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .feedback-text {
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* ---------- Access table ---------- */
+        .action-form { display: inline-flex; gap: 6px; align-items: center; }
+        .action-select {
+            padding: 6px 10px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: 'Fira Sans', sans-serif;
+            cursor: pointer;
+            outline: none;
+        }
+        .action-select:focus { border-color: var(--accent); }
+        .action-btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .action-btn:hover { background: var(--accent-hover); }
+
+        /* ---------- Add admin form ---------- */
+        .add-form {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .add-form .form-group { margin-bottom: 0; flex: 1; min-width: 180px; }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 900px) {
+            .detail-grid { grid-template-columns: 1fr; }
+            .main { padding: 20px; }
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle { display: flex; }
+            .nav-overlay.active { display: block; }
+
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                width: 260px;
+                transition: left .3s ease;
+                z-index: 150;
+                box-shadow: var(--shadow);
+            }
+            .sidebar.open { left: 0; }
+
+            body { flex-direction: column; }
+
+            .main {
+                padding: 72px 16px 24px;
+                max-width: 100%;
+            }
+
+            .page-header h1 { font-size: 20px; }
+
+            .grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .card { padding: 16px; }
+            .card-value { font-size: 22px; }
+
+            .filter-tabs { gap: 6px; }
+            .filter-tab { padding: 6px 12px; font-size: 12px; }
+
+            .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            table { min-width: 500px; }
+
+            .detail-grid { grid-template-columns: 1fr; gap: 16px; }
+
+            .add-form { flex-direction: column; }
+            .add-form .form-group { width: 100%; }
+        }
+
+        @media (max-width: 400px) {
+            .grid { grid-template-columns: 1fr; }
+            .page-header h1 { font-size: 18px; }
+        }
+
+        /* ---------- Scrollbar ---------- */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ---------- Reduced motion ---------- */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
 
     {% if active %}
+    <button class="nav-toggle" onclick="toggleSidebar()" aria-label="Меню">☰</button>
+    <div class="nav-overlay" onclick="toggleSidebar()"></div>
+
     <aside class="sidebar">
         <div class="brand">
             <div class="brand-logo">ПБ</div>
@@ -421,11 +632,14 @@
         </div>
 
         <nav class="nav">
-            <a href="/admin/dashboard" class="{{ 'active' if active == 'dashboard' else '' }}">
-                <span class="nav-icon">📊</span> <span class="label">Дашборд</span>
-            </a>
             <a href="/admin/requests" class="{{ 'active' if active == 'requests' else '' }}">
                 <span class="nav-icon">📋</span> <span class="label">Заявки</span>
+            </a>
+            <a href="/admin/feedback" class="{{ 'active' if active == 'feedback' else '' }}">
+                <span class="nav-icon">💬</span> <span class="label">Обратная связь</span>
+            </a>
+            <a href="/admin/access" class="{{ 'active' if active == 'access' else '' }}">
+                <span class="nav-icon">🔑</span> <span class="label">Доступ</span>
             </a>
         </nav>
 
@@ -441,5 +655,11 @@
         {% block content %}{% endblock %}
     </main>
 
+    <script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.querySelector('.nav-overlay').classList.toggle('active');
+    }
+    </script>
 </body>
 </html>

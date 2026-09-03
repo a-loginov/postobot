@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>🔑 Управление доступом</h1>
+        <p>Назначение ролей и выдача прав администратора</p>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 24px;">
+    <div class="section-title">Добавить администратора</div>
+    <form method="POST" action="/admin/access/add" class="add-form">
+        <div class="form-group">
+            <label class="form-label">Telegram ID</label>
+            <input type="number" name="telegram_id" class="form-input" placeholder="123456789" required>
+        </div>
+        <button type="submit" class="action-btn" style="height: 42px; padding: 0 20px;">Выдать доступ</button>
+    </form>
+</div>
+
+{% if users %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Пользователь</th>
+                <th>Telegram ID</th>
+                <th>Роль</th>
+                <th>Дата регистрации</th>
+                <th>Действие</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>
+                    <div style="font-weight: 600;">{{ u.full_name or 'Без имени' }}</div>
+                    <div class="muted">{% if u.username %}@{{ u.username }}{% endif %}</div>
+                </td>
+                <td><span style="font-family: 'Fira Code', monospace; font-size: 13px;">{{ u.telegram_id }}</span></td>
+                <td>
+                    {% if u.role.value == 'ADMIN' %}
+                    <span class="role-badge role-admin">Администратор</span>
+                    {% else %}
+                    <span class="role-badge role-user">Пользователь</span>
+                    {% endif %}
+                </td>
+                <td class="muted">{{ u.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>
+                    <form method="POST" action="/admin/access/{{ u.id }}/role" class="action-form">
+                        <select name="new_role" class="action-select">
+                            <option value="USER" {{ 'selected' if u.role.value == 'USER' }}>Пользователь</option>
+                            <option value="ADMIN" {{ 'selected' if u.role.value == 'ADMIN' }}>Администратор</option>
+                        </select>
+                        <button type="submit" class="action-btn">OK</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card empty">
+    <div class="empty-icon">👤</div>
+    <h3>Пользователей пока нет</h3>
+    <p>Зарегистрированные пользователи появятся здесь</p>
+</div>
+{% endif %}
+{% endblock %}

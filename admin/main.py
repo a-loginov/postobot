@@ -11,8 +11,7 @@ from sqlalchemy.orm import Session, selectinload
 
 import config
 from database.database import SessionLocal
-from database.models import Request as DBRequest
-from database.models import RequestStatus, User
+from database.models import Feedback, Request as DBRequest, RequestStatus, User, UserRole
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +73,7 @@ def create_app() -> FastAPI:
     @app.get("/admin", response_class=HTMLResponse)
     async def admin_home(request: Request):
         if is_authed(request):
-            return RedirectResponse(url="/admin/dashboard", status_code=303)
+            return RedirectResponse(url="/admin/requests", status_code=303)
         return templates.TemplateResponse(
             request, "login.html", {"error": None, "title": "Вход в админ-панель"}
         )
@@ -95,7 +94,7 @@ def create_app() -> FastAPI:
                 status_code=401,
             )
         token = make_token()
-        resp = RedirectResponse(url="/admin/dashboard", status_code=303)
+        resp = RedirectResponse(url="/admin/requests", status_code=303)
         resp.set_cookie(
             AUTH_COOKIE,
             token,
@@ -105,80 +104,6 @@ def create_app() -> FastAPI:
             secure=False,
         )
         return resp
-
-    @app.get("/admin/dashboard", response_class=HTMLResponse)
-    async def dashboard(request: Request, db: Session = Depends(get_session)):
-        if not is_authed(request):
-            return redirect_login()
-
-        now = datetime.now(timezone.utc).replace(tzinfo=None)
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        week_start = today_start - timedelta(days=7)
-
-        total_requests = db.query(func.count(DBRequest.id)).scalar() or 0
-        today_requests = (
-            db.query(func.count(DBRequest.id))
-            .filter(DBRequest.created_at >= today_start)
-            .scalar()
-            or 0
-        )
-        week_requests = (
-            db.query(func.count(DBRequest.id))
-            .filter(DBRequest.created_at >= week_start)
-            .scalar()
-            or 0
-        )
-        total_users = db.query(func.count(User.id)).scalar() or 0
-
-        status_counts = {
-            k.value: v
-            for k, v in db.query(DBRequest.status, func.count(DBRequest.id))
-            .group_by(DBRequest.status)
-            .all()
-        }
-
-        recent_requests = (
-            db.query(DBRequest)
-            .options(selectinload(DBRequest.user))
-            .order_by(DBRequest.created_at.desc())
-            .limit(10)
-            .all()
-        )
-
-        # Requests per day for the last 7 days
-        days_spans = []
-        for i in range(6, -1, -1):
-            day = today_start - timedelta(days=i)
-            day_end = day + timedelta(days=1)
-            count = (
-                db.query(func.count(DBRequest.id))
-                .filter(DBRequest.created_at >= day, DBRequest.created_at < day_end)
-                .scalar()
-                or 0
-            )
-            days_spans.append(
-                {"label": day.strftime("%d.%m"), "count": count}
-            )
-
-        max_day_count = max((d["count"] for d in days_spans), default=1) or 1
-
-        return templates.TemplateResponse(
-            request,
-            "dashboard.html",
-            {
-                "title": "Дашборд",
-                "active": "dashboard",
-                "total_requests": total_requests,
-                "today_requests": today_requests,
-                "week_requests": week_requests,
-                "total_users": total_users,
-                "status_counts": status_counts,
-                "status_labels": STATUS_LABELS,
-                "recent_requests": recent_requests,
-                "days_spans": days_spans,
-                "max_day_count": max_day_count,
-            },
-        )
 
     @app.get("/admin/requests", response_class=HTMLResponse)
     async def requests_list(
@@ -269,6 +194,92 @@ def create_app() -> FastAPI:
         return RedirectResponse(
             url=f"/admin/requests/{request_id}", status_code=303
         )
+
+    @app.get("/admin/feedback", response_class=HTMLResponse)
+    async def feedback_list(
+        request: Request,
+        db: Session = Depends(get_session),
+    ):
+        if not is_authed(request):
+            return redirect_login()
+
+        feedbacks = (
+            db.query(Feedback)
+            .order_by(Feedback.created_at.desc())
+            .all()
+        )
+
+        return templates.TemplateResponse(
+            request,
+            "feedback.html",
+            {
+                "title": "Обратная связь",
+                "active": "feedback",
+                "feedbacks": feedbacks,
+            },
+        )
+
+    @app.get("/admin/access", response_class=HTMLResponse)
+    async def access_list(
+        request: Request,
+        db: Session = Depends(get_session),
+    ):
+        if not is_authed(request):
+            return redirect_login()
+
+        users = db.query(User).order_by(User.created_at.desc()).all()
+
+        return templates.TemplateResponse(
+            request,
+            "access.html",
+            {
+                "title": "Управление доступом",
+                "active": "access",
+                "users": users,
+                "role_labels": {"USER": "Пользователь", "ADMIN": "Администратор"},
+            },
+        )
+
+    @app.post("/admin/access/{user_id}/role")
+    async def update_user_role(
+        request: Request,
+        user_id: int,
+        new_role: str = Form(""),
+        db: Session = Depends(get_session),
+    ):
+        if not is_authed(request):
+            return redirect_login()
+
+        try:
+            target = UserRole(new_role)
+        except ValueError:
+            return RedirectResponse(url="/admin/access", status_code=303)
+
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is not None:
+            user.role = target
+            db.commit()
+
+        return RedirectResponse(url="/admin/access", status_code=303)
+
+    @app.post("/admin/access/add")
+    async def add_admin(
+        request: Request,
+        telegram_id: int = Form(...),
+        db: Session = Depends(get_session),
+    ):
+        if not is_authed(request):
+            return redirect_login()
+
+        user = db.query(User).filter(User.telegram_id == telegram_id).first()
+        if user is None:
+            user = User(telegram_id=telegram_id, role=UserRole.ADMIN)
+            db.add(user)
+        else:
+            user.role = UserRole.ADMIN
+        db.commit()
+
+        return RedirectResponse(url="/admin/access", status_code=303)
 
     @app.get("/admin/logout")
     async def logout():

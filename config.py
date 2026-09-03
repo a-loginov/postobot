@@ -23,16 +23,27 @@ ADMIN_IDS: list[int] = [
     if x.strip()
 ]
 
-ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin")
-SECRET_KEY: str = os.getenv("SECRET_KEY", "postobot-dev-secret")
+ADMIN_PASSWORD: str = _get_required("ADMIN_PASSWORD")
+SECRET_KEY: str = _get_required("SECRET_KEY")
 ADMIN_HOST: str = os.getenv("ADMIN_HOST", "localhost")
 ADMIN_PORT: int = int(os.getenv("ADMIN_PORT", "2026"))
 
-# Database file lives in ./local_db relative to the project root.
-# Path is computed from BASE_DIR so it works on any machine.
 LOCAL_DB_DIR = BASE_DIR / "local_db"
 DATABASE_URL = f"sqlite:///{LOCAL_DB_DIR / 'postobot.db'}"
 
 
 def is_admin(telegram_id: int) -> bool:
-    return telegram_id in ADMIN_IDS
+    if telegram_id in ADMIN_IDS:
+        return True
+    try:
+        from database.database import SessionLocal
+        from database.models import User, UserRole
+
+        db = SessionLocal()
+        try:
+            user = db.query(User).filter(User.telegram_id == telegram_id).first()
+            return user is not None and user.role == UserRole.ADMIN
+        finally:
+            db.close()
+    except Exception:
+        return False
