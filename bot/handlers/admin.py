@@ -57,6 +57,7 @@ async def admin_open_request(callback: CallbackQuery, bot: Bot) -> None:
             await callback.answer("⚠️ Заявка не найдена.")
             return
 
+    await callback.answer()
     n = NotificationService(bot)
     text = n.format_request_for_admin(request)
     user_tg_id = request.user.telegram_id if request.user else None
@@ -69,7 +70,6 @@ async def admin_open_request(callback: CallbackQuery, bot: Bot) -> None:
         )
     else:
         await callback.message.answer(text, reply_markup=kb)
-    await callback.answer()
 
 
 @router.callback_query(
@@ -112,6 +112,7 @@ async def admin_change_status(callback: CallbackQuery, bot: Bot) -> None:
             n = NotificationService(bot)
             await n.notify_status_changed(user_telegram_id, request)
 
+    await callback.answer()
     kb = get_admin_request_keyboard(
         request.id,
         request.status.value,
@@ -125,7 +126,6 @@ async def admin_change_status(callback: CallbackQuery, bot: Bot) -> None:
         )
     else:
         await callback.message.answer(text, reply_markup=kb)
-    await callback.answer()
 
 
 @router.callback_query(
@@ -141,6 +141,7 @@ async def admin_user_info(callback: CallbackQuery) -> None:
         await callback.answer("⚠️ Пользователь не найден.")
         return
 
+    await callback.answer()
     text = (
         "👤 Пользователь\n\n"
         f"ID: {user.telegram_id}\n"
@@ -149,4 +150,3 @@ async def admin_user_info(callback: CallbackQuery) -> None:
         f"Роль: {user.role.value}"
     )
     await callback.message.answer(text)
-    await callback.answer()

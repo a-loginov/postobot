@@ -61,6 +61,7 @@ async def on_user_open(callback: CallbackQuery, bot: Bot) -> None:
                 "⚠️ Заявка не найдена.", reply_markup=get_main_keyboard(callback.from_user.id)
             )
             return
+    await callback.answer()
     n = NotificationService(bot)
     text = n.format_request_for_user(request)
     if request.photo_file_id:
@@ -70,4 +71,3 @@ async def on_user_open(callback: CallbackQuery, bot: Bot) -> None:
         )
     else:
         await callback.message.answer(text)
-    await callback.answer()
