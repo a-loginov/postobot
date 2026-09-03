@@ -1,7 +1,7 @@
 import logging
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from database.models import Request, RequestStatus, User
 
@@ -21,7 +21,12 @@ class RequestRepository:
         self._session = session
 
     def get(self, request_id: int) -> Request | None:
-        return self._session.get(Request, request_id)
+        stmt = (
+            select(Request)
+            .options(selectinload(Request.user))
+            .where(Request.id == request_id)
+        )
+        return self._session.scalar(stmt)
 
     def get_or_404(self, request_id: int) -> Request:
         request = self.get(request_id)
@@ -67,13 +72,18 @@ class RequestRepository:
     def list_by_status(self, status: RequestStatus) -> list[Request]:
         stmt = (
             select(Request)
+            .options(selectinload(Request.user))
             .where(Request.status == status)
             .order_by(Request.created_at.desc())
         )
         return list(self._session.scalars(stmt).all())
 
     def list_all(self) -> list[Request]:
-        stmt = select(Request).order_by(Request.created_at.desc())
+        stmt = (
+            select(Request)
+            .options(selectinload(Request.user))
+            .order_by(Request.created_at.desc())
+        )
         return list(self._session.scalars(stmt).all())
 
     def update_status(self, request_id: int, status: RequestStatus) -> Request:
