@@ -10,3 +10,7 @@ class RequestForm(StatesGroup):
 
 class RequestEdit(StatesGroup):
     waiting_for_field = State()
+
+
+class FeedbackForm(StatesGroup):
+    waiting_for_text = State()

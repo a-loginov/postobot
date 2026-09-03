@@ -95,6 +95,20 @@ class NotificationService:
             f"Статус:\n{status_emoji} {request.status.value}"
         )
 
+    async def notify_admins_feedback(
+        self, admin_ids: list[int], telegram_id: int, text: str
+    ) -> None:
+        for admin_id in admin_ids:
+            try:
+                await self._bot.send_message(
+                    chat_id=admin_id,
+                    text=f"💬 Обратная связь от @{telegram_id}\n\n{text}",
+                )
+            except Exception:
+                logger.exception(
+                    "Failed to send feedback to admin telegram_id=%s", admin_id
+                )
+
     @staticmethod
     def format_request_short(user_info: User, request: Request) -> str:
         status_emoji = STATUS_EMOJI.get(request.status, "🟡")

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Заявки</h1>
+        <p>Все заявки пользователей</p>
+    </div>
+</div>
+
+<div class="filter-tabs">
+    <a class="filter-tab {{ 'active' if current_status == 'ALL' else '' }}" href="/admin/requests">Все</a>
+    <a class="filter-tab {{ 'active' if current_status == 'NEW' else '' }}" href="/admin/requests?status=NEW">🟡 Новые</a>
+    <a class="filter-tab {{ 'active' if current_status == 'IN_PROGRESS' else '' }}" href="/admin/requests?status=IN_PROGRESS">🔵 В работе</a>
+    <a class="filter-tab {{ 'active' if current_status == 'COMPLETED' else '' }}" href="/admin/requests?status=COMPLETED">✅ Выполнено</a>
+    <a class="filter-tab {{ 'active' if current_status == 'REJECTED' else '' }}" href="/admin/requests?status=REJECTED">🔴 Отклонено</a>
+</div>
+
+{% if requests %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Пользователь</th>
+                <th>Класс</th>
+                <th>Что</th>
+                <th>Статус</th>
+                <th>Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in requests %}
+            <tr>
+                <td><a class="table-link" href="/admin/requests/{{ r.id }}">#{{ r.id }}</a></td>
+                <td>{{ r.full_name }}</td>
+                <td class="muted">{{ r.class_name }}</td>
+                <td class="muted">{{ r.reason[:50] }}{{ '…' if r.reason|length > 50 }}</td>
+                <td>
+                    <span class="badge badge-{{ r.status.value|lower }}">
+                        <span class="badge-dot"></span>{{ status_label(r.status) }}
+                    </span>
+                </td>
+                <td class="muted">{{ r.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card empty">
+    <div class="empty-icon">📭</div>
+    <h3>Заявок нет</h3>
+    {% if current_status != 'ALL' %}
+    <p>В этом статусе заявок нет</p>
+    {% else %}
+    <p>Пока ни одной заявки не создано</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Дашборд</h1>
+        <p>Статистика и активность сервиса</p>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-label">📊 Всего заявок</div>
+        <div class="card-value accent">{{ total_requests }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">🕑 Сегодня</div>
+        <div class="card-value blue">{{ today_requests }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">📅 За 7 дней</div>
+        <div class="card-value purple">{{ week_requests }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">👤 Пользователей</div>
+        <div class="card-value">{{ total_users }}</div>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-label">
+            <span class="badge badge-new"><span class="badge-dot"></span>Новые</span>
+        </div>
+        <div class="card-value yellow">{{ status_counts.get('NEW', 0) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">
+            <span class="badge badge-in-progress"><span class="badge-dot"></span>В работе</span>
+        </div>
+        <div class="card-value blue">{{ status_counts.get('IN_PROGRESS', 0) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">
+            <span class="badge badge-completed"><span class="badge-dot"></span>Выполнено</span>
+        </div>
+        <div class="card-value green">{{ status_counts.get('COMPLETED', 0) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-label">
+            <span class="badge badge-rejected"><span class="badge-dot"></span>Отклонено</span>
+        </div>
+        <div class="card-value red">{{ status_counts.get('REJECTED', 0) }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="section-title">📈 Заявки за последние 7 дней</div>
+    <div class="chart">
+        {% for day in days_spans %}
+        <div class="chart-bar-wrap" title="{{ day.label }}: {{ day.count }}">
+            <div class="chart-count">{{ day.count }}</div>
+            <div class="chart-bar" style="height: {{ (day.count / max_day_count * 100) if max_day_count else 0 }}%;"></div>
+            <div class="chart-label">{{ day.label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div style="margin-top: 28px;">
+    <div class="page-header" style="margin-bottom: 14px;">
+        <div class="section-title" style="margin-bottom: 0;">🕒 Последние заявки</div>
+        <a class="filter-tab" href="/admin/requests">Все заявки →</a>
+    </div>
+
+    {% if recent_requests %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Пользователь</th>
+                    <th>Что</th>
+                    <th>Статус</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in recent_requests %}
+                <tr>
+                    <td><a class="table-link" href="/admin/requests/{{ r.id }}">#{{ r.id }}</a></td>
+                    <td>{{ r.full_name }}</td>
+                    <td class="muted">{{ r.reason[:40] }}{{ '…' if r.reason|length > 40 }}</td>
+                    <td>
+                        <span class="badge badge-{{ r.status.value|lower }}">
+                            <span class="badge-dot"></span>{{ status_labels[r.status.value] }}
+                        </span>
+                    </td>
+                    <td class="muted">{{ r.created_at.strftime('%d.%m %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card empty">
+        <div class="empty-icon">📭</div>
+        <h3>Заявок пока нет</h3>
+        <p>Новые заявки от пользователей появятся здесь</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

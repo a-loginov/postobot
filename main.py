@@ -15,6 +15,7 @@ BOT_COMMANDS = [
     BotCommand(command="help", description="Помощь"),
     BotCommand(command="my", description="Мои заявки"),
     BotCommand(command="admin", description="Администрирование"),
+    BotCommand(command="feedback", description="Обратная связь"),
 ]
 
 
@@ -32,15 +33,21 @@ async def main() -> None:
     init_db()
     logger.info("База данных готова")
 
+    from admin.main import start_admin_server
+
+    start_admin_server()
+    logger.info("Админ-панель запущена на http://%s:%s", config.ADMIN_HOST, config.ADMIN_PORT)
+
     bot = Bot(token=config.BOT_TOKEN)
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
 
-    from bot.handlers import admin, fallback, request, start, user
+    from bot.handlers import admin, fallback, feedback, request, start, user
 
     dp.include_router(start.router)
     dp.include_router(user.router)
     dp.include_router(request.router)
+    dp.include_router(feedback.router)
     dp.include_router(admin.router)
     dp.include_router(fallback.router)
 

@@ -23,6 +23,11 @@ ADMIN_IDS: list[int] = [
     if x.strip()
 ]
 
+ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "admin")
+SECRET_KEY: str = os.getenv("SECRET_KEY", "postobot-dev-secret")
+ADMIN_HOST: str = os.getenv("ADMIN_HOST", "localhost")
+ADMIN_PORT: int = int(os.getenv("ADMIN_PORT", "2026"))
+
 # Database file lives in ./local_db relative to the project root.
 # Path is computed from BASE_DIR so it works on any machine.
 LOCAL_DB_DIR = BASE_DIR / "local_db"
